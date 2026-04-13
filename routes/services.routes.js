@@ -4,15 +4,17 @@ import {
   getServiceById,
   addService,
   updateService,
-  deleteService
+  deleteService,
 } from "../controllers/services.controller.js";
+
+import { verifyToken } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
-router.get("/", getAllServices);
-router.get("/:id", getServiceById);
-router.post("/", addService);
-router.put("/:id", updateService);
-router.delete("/:id", deleteService);
+router.get("/", verifyToken, getAllServices);
+router.get("/:id", verifyToken, getServiceById);
+router.post("/", verifyToken, addService);
+router.put("/:id", verifyToken, updateService);
+router.delete("/:id", verifyToken, deleteService);
 
 export default router;
