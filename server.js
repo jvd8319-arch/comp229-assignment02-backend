@@ -7,7 +7,7 @@ import morgan from "morgan";
 import cors from "cors";
 import createError from "http-errors";
 import connectDB from "./config/db.js";
-import mongoose from "mongoose";   // ✅ Added to read DB name
+import mongoose from "mongoose"; // For DB name logging
 
 // Routers
 import authRouter from "./routes/auth.routes.js";
@@ -22,7 +22,7 @@ import { verifyToken } from "./middleware/auth.middleware.js";
 // Connect DB
 connectDB();
 
-// ✅ Log the connected database name
+// Log DB name
 mongoose.connection.on("connected", () => {
   console.log("🔥 Connected to DB:", mongoose.connection.name);
 });
@@ -31,7 +31,19 @@ const app = express();
 
 // Middleware
 app.use(morgan("dev"));
-app.use(cors());
+
+// ⭐ FIXED CORS CONFIGURATION (REQUIRED FOR TOKEN TO WORK ON RENDER)
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "https://comp229-assignment1-usvy.onrender.com"
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
 app.use(express.json());
 
 // Test route
@@ -42,12 +54,10 @@ app.get("/test", (req, res) => {
 // Public routes
 app.use("/api/auth", authRouter);
 
-// Protected routes (Assignment requirement)
+// Protected routes
 app.use("/api/projects", verifyToken, projectsRouter);
 app.use("/api/references", verifyToken, referencesRouter);
 app.use("/api/services", verifyToken, servicesRouter);
-
-// Users: only update/delete require auth
 app.use("/api/users", verifyToken, usersRouter);
 
 // Root route
